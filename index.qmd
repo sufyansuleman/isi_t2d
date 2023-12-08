@@ -1,0 +1,345 @@
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+library(here)
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+source(here::here("R/load-packages.R"))
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+source("R/functions.R")
+
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+
+parent_dir <- ("Z:/gwas/results/inter99/linear_model")
+```
+
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+
+
+
+# Set the list of phenotypes for each category
+fasting <- c("insu0", "raynaud", "homa_ir", "quicki", "belfiore_0", "ig_ratio_0", "isi_0", "bennett", "avignon_si0")
+ogtt_0_120 <- c("insu120", "pglu120", "isi_120", "ig_ratio_120", "gutt", "avignon_si120", "avignon_sim", "mod_stumvoll", "stumvoll_dem","ifc")
+ogtt_0_30_120 <- c("bigtt_si", "matsuda")
+
+# Initialize dataframes for each category and subcategory
+dataframes_t2d <- list(
+  fasting_snps_bmi = data.frame(),
+  fasting_snps_no_bmi = data.frame(),
+  ogtt_0_120_snps_bmi = data.frame(),
+  ogtt_0_120_snps_no_bmi = data.frame(),
+  ogtt_0_30_120_snps_bmi = data.frame(),
+  ogtt_0_30_120_snps_no_bmi = data.frame()
+)
+
+#Function to flip values in alt_effsize column based on condition
+flip_alt_effsize <- function(df) {
+  df <- df %>%
+    mutate(alt_effsize = ifelse(t_2_d_risk_allele != alt, -alt_effsize, alt_effsize))
+  return(df)
+}
+
+# Loop through the phenotypes for each category
+for (category in c("fasting", "ogtt_0_120", "ogtt_0_30_120")) {
+  for (p in get(category)) {
+    # Set the input file paths for the current phenotype with _bmi and _no_bmi
+    bmi_input_path <- file.path(parent_dir, paste0(p, "_bmi_t2d_assoc.txt"))
+    no_bmi_input_path <- file.path(parent_dir, paste0(p, "_no_bmi_t2d_assoc.txt"))
+    
+    # Determine the type based on the category
+    if (category == "fasting") {
+      type <- "Fasting"
+    } else if (category == "ogtt_0_120") {
+      type <- "OGTT_0,120"
+    } else if (category == "ogtt_0_30_120") {
+      type <- "OGTT_0,30,120"
+    }
+    
+    # Only proceed if the input files exist
+    if (file.exists(bmi_input_path)) {
+      # Read the input file and add a column for the phenotype and the adjustment
+      bmi_data <- read_delim(bmi_input_path, delim = "\t", col_names = TRUE) %>%
+        dplyr::mutate(is_index = p, type = type) %>% 
+        dplyr::filter(!is.na(alt))
+      
+      # Append the data to the appropriate dataframe in the list
+      dataframes_t2d[[paste0(category, "_snps_bmi")]] <- bind_rows(dataframes_t2d[[paste0(category, "_snps_bmi")]], bmi_data)
+    }
+    
+    # Repeat the same process for the no_bmi files
+    if (file.exists(no_bmi_input_path)) {
+      # Read the input file and add a column for the phenotype and the adjustment
+      no_bmi_data <- read_delim(no_bmi_input_path, delim = "\t", col_names = TRUE) %>%
+        dplyr::mutate(is_index = p, type = type) %>% 
+        dplyr::filter(!is.na(alt))
+      
+      # Append the data to the appropriate dataframe in the list
+      dataframes_t2d[[paste0(category, "_snps_no_bmi")]] <- bind_rows(dataframes_t2d[[paste0(category, "_snps_no_bmi")]], no_bmi_data)
+    }
+  }
+}
+
+# Apply the flip_alt_effsize function to all dataframes in dataframes_t2d
+dataframes_t2d <- lapply(dataframes_t2d, flip_alt_effsize)
+
+
+
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+# Extract individual dataframes from the list
+t2d_fasting_snps_bmi <- dataframes_t2d$fasting_snps_bmi
+t2d_ogtt_2_snps_bmi <- dataframes_t2d$ogtt_0_120_snps_bmi
+t2d_ogtt_3_snps_bmi <- dataframes_t2d$ogtt_0_30_120_snps_bmi
+```
+
+```{r}
+#| echo: false
+#| include: false
+# join all in one long dataframe
+
+t2d_all_indices_combined <- bind_rows(t2d_fasting_snps_bmi, t2d_ogtt_2_snps_bmi, t2d_ogtt_3_snps_bmi) %>% 
+  mutate(gene_snp_ra = paste(nearest_gene, index_variant, t_2_d_risk_allele, sep = " - "))
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+# Assuming your data is in a dataframe called 'your_data'
+# Data preprocessing
+t2d_all_indices_bmi <- t2d_all_indices_combined %>% 
+  dplyr::rename(index_group = type) %>% 
+  dplyr::mutate(
+    is_index = case_when(
+      is_index == "insu0" ~ "1/FIns",
+      is_index == "homa_ir" ~ "1/HOMA-IR",
+      is_index == "raynaud" ~ "Raynaud SI",
+      is_index == "quicki" ~ "QUICKI",
+      is_index == "belfiore_0" ~ "Belfiore basal",
+      is_index == "ig_ratio_0" ~ "1/FIns/FGlu",
+      is_index == "isi_0" ~ "ISI basal",
+      is_index == "bennett" ~ "Bennett SI",
+      is_index == "avignon_si0" ~ "Avignon SI0",
+      is_index == "insu120" ~ "1/Ins 120",
+      is_index == "pglu120" ~ "1/Glu 120",
+      is_index == "isi_120" ~ "ISI 120",
+      is_index == "ig_ratio_120" ~ "1/(Ins/Glu)120",
+      is_index == "gutt" ~ "Gutt Index",
+      is_index == "avignon_si120" ~ "Avignon SI120",
+      is_index == "avignon_sim" ~ "Avignon SIM",
+      is_index == "mod_stumvoll" ~ "Stumvoll Modi",
+      is_index == "stumvoll_dem" ~ "Stumvoll Dem",
+      is_index == "ifc" ~ "1/IFC",
+      is_index == "bigtt_si" ~ "BIGTT SI",
+      is_index == "matsuda" ~ "Matsuda",
+      TRUE ~ is_index  # Return the same value for unmatched cases
+    )
+  ) %>% 
+  dplyr::ungroup()
+
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+# Reorder on the IS index 
+t2d_all_indices_bmi$is_index <- factor(t2d_all_indices_bmi$is_index, levels = c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0", "1/Ins 120", "1/Glu 120", "ISI 120", "1/(Ins/Glu)120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "1/IFC", "BIGTT SI", "Matsuda"))
+
+# Reorder Index group
+t2d_all_indices_bmi$index_group <- factor(t2d_all_indices_bmi$index_group, levels = c("Fasting", "OGTT_0,120", "OGTT_0,30,120"))
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+
+# Create matrices for the heatmap
+
+# Create a matrix 'snp_index_effect' by selecting 'nearest_gene', 'is_index', and 'alt_effsize' columns
+t2d_effect_matx <- t2d_all_indices_bmi %>%
+  dplyr::select(gene_snp_ra, is_index, alt_effsize) %>% 
+  tidyr::spread(is_index, alt_effsize) %>% 
+      as_tibble() %>% 
+  tibble::column_to_rownames(var = "gene_snp_ra") %>% 
+  as.matrix()
+  
+
+
+# do clustring 
+set.seed(123)
+m_clusters <- Mclust(t2d_effect_matx)
+
+# get the cluster classification
+clusters <- m_clusters$classification
+# convert to datafrmae
+data_frame <- as.data.frame(t2d_effect_matx)
+# add cluster column
+data_frame$cluster <- clusters
+# order the rows and then remove the cluster column convert back to matrix
+t2d_effect_mat_ordered <- data_frame[order(data_frame$cluster), -ncol(data_frame)] %>% 
+  as.matrix()
+    
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+# Create a matrix 'snp_index_effect' by selecting 'nearest_gene', 'is_index', and 'pvalue' columns
+t2d_p_mat <- t2d_all_indices_bmi %>%
+  dplyr::select(gene_snp_ra, is_index, pvalue) %>% 
+  tidyr::spread(is_index, pvalue) %>% 
+      as_tibble() %>% 
+  tibble::column_to_rownames(var = "gene_snp_ra") %>% 
+  as.matrix()
+
+# ordered the row name sof p_mat to same as the effect_mat
+
+order_names <- rownames(t2d_effect_mat_ordered)
+
+t2d_p_mat_ordred <- t2d_p_mat[order_names, ] 
+
+```
+
+
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+# Convert the matrix to a long format
+effsize_long <- as.data.frame(t2d_effect_mat_ordered) %>%
+  rownames_to_column(var = "gene_snp_ra") %>%
+  pivot_longer(cols = -gene_snp_ra, names_to = "is_index", values_to = "alt_effsize")
+
+p_long <- as.data.frame(t2d_p_mat_ordred) %>%
+  rownames_to_column(var = "gene_snp_ra") %>%
+  pivot_longer(cols = -gene_snp_ra, names_to = "is_index", values_to = "pvalue")
+
+```
+
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+# Combine the data
+combined_data <- effsize_long %>%
+  left_join(p_long, by = c("gene_snp_ra", "is_index")) %>% 
+    mutate(
+    index_group = case_when(
+      is_index %in% c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0") ~ "Fasting",
+      is_index %in% c("1/Ins 120", "1/Glu 120", "ISI 120", "1/(Ins/Glu)120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "1/IFC") ~ "OGTT,0-120",
+      is_index %in% c("BIGTT SI", "Matsuda") ~ "OGTT,0-30-120",
+      TRUE ~ "Other"  # For any unmatched case
+    )
+  )
+```
+
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+
+combined_data <- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ]
+
+```
+
+
+```{r}
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra, type = "heatmap", z = ~alt_effsize,
+                          colorscale = list(c(0, "blue"), c(0.5, "white"), c(1, "red")),
+                          zmin = -0.04, zmax = 0.04, text = ~paste(gene_snp_ra,
+                                                                   "\nEffect-size:", alt_effsize,
+                                                                   "\nP-value:", pvalue,
+                                                                   "\nIndex:", is_index, 
+                                                                   "\nIndex Group:", index_group),
+                          hoverinfo = "text") %>%
+  layout(xaxis = list(title = "Indices", tickangle = 90),
+         yaxis = list(title = "Gene SNP RA"),
+         colorbar = list(title = "Beta"))
+
+
+```
+
+
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| column: screen
+#| fig.height: 100
+#| fig-cap: "Insulin sensitiivty indices assocaition with T2D risk alleles"
+
+plotly_heatmap
+
+```
+
+
+
+
+
+
+
+
+
+

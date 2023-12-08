@@ -1,0 +1,8 @@
+title: "Paper title"
+format:
+  html:
+    layout:
+      - single-column
+
+execute:
+  freeze: auto
