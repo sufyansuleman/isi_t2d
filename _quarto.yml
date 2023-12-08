@@ -1,8 +1,12 @@
-title: "Paper title"
+project:
+  type: website
+
+title: "Suleman et al 2024, Genetics underpinnings of fasting and oral glucose-stimulated based insulin sensitivity indices"
 format:
   html:
     layout:
       - single-column
+
 
 execute:
   freeze: auto
