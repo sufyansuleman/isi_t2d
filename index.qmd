@@ -316,8 +316,7 @@ plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra,
 #| message: false
 #| column: screen
 #| fig.height: 300
-#| fig-cap: "Insulin sensitiivty indices assocaition with T2D risk alleles"
-#| label: Association between 21 insulin sensitivity indices and 426 genetic variants known to be assciated with T2D in population cohort.
+#| fig-cap: "The effect of T2D-associated risk alleles on IS indices. The figure displays association between 21 IS indices and 426 T2D-associated variants with MAF > 1%. All effects are for T2D-risk increasing allele. The x-axis displays the indices, and the y-axis, shown effect sizes for the specificed gene (locus), variant, and T2D-risk allele. The plot is unclustred and ordered by effect size. The color scale represents the effect size, with blue indicating a negative effect and red a positive effect. The text displayed on hover shows the gene, variant, effect size, p-value, index, and index group. The index group is based on the type of index (fasting, OGTT0,120, or OGTT0,30,120)."
 
 plotly_heatmap
 
