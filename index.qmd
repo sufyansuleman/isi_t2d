@@ -315,7 +315,7 @@ plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra,
 #| warning: false
 #| message: false
 #| column: screen
-#| fig.height: 300
+#| fig.height: 250
 #| fig.width: 50
 #| fig-cap: "Insulin sensitiivty indices assocaition with T2D risk alleles"
 #| label: Association between 21 insulin sensitivity indices and 426 genetic variants known to be assciated with T2D in population cohort.
