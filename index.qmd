@@ -324,8 +324,7 @@ plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra,
 
 ```{r}
 #| echo: false
-#| warning: false
-#| message: false
+#| include: false
 #| column: screen
 #| fig.height: 135
 #| fig-cap: "Insulin sensitiivty indices assocaition with T2D risk alleles"
