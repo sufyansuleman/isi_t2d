@@ -127,6 +127,7 @@ t2d_ogtt_2_snps_bmi <- dataframes_t2d$ogtt_0_120_snps_bmi
 t2d_ogtt_3_snps_bmi <- dataframes_t2d$ogtt_0_30_120_snps_bmi
 ```
 
+
 ```{r}
 #| echo: false
 #| include: false
@@ -182,72 +183,33 @@ t2d_all_indices_bmi <- t2d_all_indices_combined %>%
 #| include: false
 #| warning: false
 #| message: false
-# Reorder on the IS index
-t2d_all_indices_bmi$is_index <- factor(t2d_all_indices_bmi$is_index, levels = c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0", "1/Ins 120", "1/Glu 120", "ISI 120", "1/(Ins/Glu)120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "1/IFC", "BIGTT SI", "Matsuda"))
-
-# Reorder Index group
-t2d_all_indices_bmi$index_group <- factor(t2d_all_indices_bmi$index_group, levels = c("Fasting", "OGTT_0,120", "OGTT_0,30,120"))
-```
-
-
-```{r}
-#| echo: false
-#| include: false
-#| warning: false
-#| message: false
 
 # Create matrices for the heatmap
 
 # Create a matrix 'snp_index_effect' by selecting 'nearest_gene', 'is_index', and 'alt_effsize' columns
 t2d_effect_matx <- t2d_all_indices_bmi %>%
-  dplyr::select(gene_snp_ra, is_index, alt_effsize) %>%
-  tidyr::spread(is_index, alt_effsize) %>%
-      as_tibble() %>%
-  tibble::column_to_rownames(var = "gene_snp_ra") %>%
+  dplyr::select(gene_snp_ra, is_index, alt_effsize) %>% 
+  tidyr::spread(is_index, alt_effsize) %>% 
+      as_tibble() %>% 
+  tibble::column_to_rownames(var = "gene_snp_ra") %>% 
   as.matrix()
-```
+  
 
 
-```{r}
-# #| echo: false
-# #| include: false
-# #| warning: false
-# #| message: false
-#
-# # do clustring
-# set.seed(123)
-# m_clusters <- Mclust(t2d_effect_matx)
-#
-# # get the cluster classification
-# clusters <- m_clusters$classification
-# # convert to datafrmae
-# data_frame <- as.data.frame(t2d_effect_matx)
-# # add cluster column
-# data_frame$cluster <- clusters
-# # order the rows and then remove the cluster column convert back to matrix
-# t2d_effect_mat_ordered <- data_frame[order(data_frame$cluster), -ncol(data_frame)] %>%
-#   as.matrix()
+# do clustring 
+set.seed(123)
+m_clusters <- Mclust(t2d_effect_matx)
 
-```
-
-```{r}
-#| echo: false
-#| include: false
-#| warning: false
-#| message: false
-
-# Assuming t2d_effect_matx is your data matrix
-# Calculate the distance matrix for rows and columns
-row_dist <- dist(t2d_effect_matx)  # Distance for rows
-col_dist <- dist(t(t2d_effect_matx))  # Distance for columns (transpose the matrix)
-
-# Perform hierarchical clustering
-row_clust <- hclust(row_dist)  # Clustering for rows
-col_clust <- hclust(col_dist)  # Clustering for columns
-
-# Reorder the matrix based on the clustering
-t2d_effect_mat_ordered <- t2d_effect_matx[row_clust$order, col_clust$order]
-
+# get the cluster classification
+clusters <- m_clusters$classification
+# convert to datafrmae
+data_frame <- as.data.frame(t2d_effect_matx)
+# add cluster column
+data_frame$cluster <- clusters
+# order the rows and then remove the cluster column convert back to matrix
+t2d_effect_mat_ordered <- data_frame[order(data_frame$cluster), -ncol(data_frame)] %>% 
+  as.matrix()
+    
 ```
 
 
@@ -258,17 +220,17 @@ t2d_effect_mat_ordered <- t2d_effect_matx[row_clust$order, col_clust$order]
 #| message: false
 # Create a matrix 'snp_index_effect' by selecting 'nearest_gene', 'is_index', and 'pvalue' columns
 t2d_p_mat <- t2d_all_indices_bmi %>%
-  dplyr::select(gene_snp_ra, is_index, pvalue) %>%
-  tidyr::spread(is_index, pvalue) %>%
-      as_tibble() %>%
-  tibble::column_to_rownames(var = "gene_snp_ra") %>%
+  dplyr::select(gene_snp_ra, is_index, pvalue) %>% 
+  tidyr::spread(is_index, pvalue) %>% 
+      as_tibble() %>% 
+  tibble::column_to_rownames(var = "gene_snp_ra") %>% 
   as.matrix()
 
 # ordered the row name sof p_mat to same as the effect_mat
 
 order_names <- rownames(t2d_effect_mat_ordered)
 
-t2d_p_mat_ordred <- t2d_p_mat[order_names, ]
+t2d_p_mat_ordred <- t2d_p_mat[order_names, ] 
 
 ```
 
@@ -300,7 +262,7 @@ p_long <- as.data.frame(t2d_p_mat_ordred) %>%
 #| message: false
 # Combine the data
 combined_data <- effsize_long %>%
-  left_join(p_long, by = c("gene_snp_ra", "is_index")) %>%
+  left_join(p_long, by = c("gene_snp_ra", "is_index")) %>% 
     mutate(
     index_group = case_when(
       is_index %in% c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0") ~ "Fasting",
@@ -309,18 +271,17 @@ combined_data <- effsize_long %>%
       TRUE ~ "Other"  # For any unmatched case
     )
   )
-
 ```
 
 
 
 ```{r}
-# #| echo: false
-# #| include: false
-# #| warning: false
-# #| message: false
-#
-# combined_data <- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ]
+#| echo: false
+#| include: false
+#| warning: false
+#| message: false
+
+combined_data <- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ]
 
 ```
 
@@ -335,7 +296,7 @@ plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra,
                           zmin = -0.04, zmax = 0.04, text = ~paste(gene_snp_ra,
                                                                    "\nEffect-size:", alt_effsize,
                                                                    "\nP-value:", pvalue,
-                                                                   "\nIndex:", is_index,
+                                                                   "\nIndex:", is_index, 
                                                                    "\nIndex Group:", index_group),
                           hoverinfo = "text") %>%
   layout(xaxis = list(title = "Indices", tickangle = 90),
@@ -348,200 +309,17 @@ plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra,
 
 
 
+
 ```{r}
 #| echo: false
-#| include: false
+#| warning: false
+#| message: false
 #| column: screen
-#| fig.height: 135
+#| fig.height: 300
+#| fig.width: 50
 #| fig-cap: "Insulin sensitiivty indices assocaition with T2D risk alleles"
 #| label: Association between 21 insulin sensitivity indices and 426 genetic variants known to be assciated with T2D in population cohort.
 
 plotly_heatmap
 
 ```
-
-
-
-<!-- ```{r} -->
-<!-- #| echo: false -->
-<!-- #| include: false -->
-<!-- #| warning: false -->
-<!-- #| message: false -->
-<!-- # Reorder on the IS index  -->
-<!-- t2d_all_indices_bmi$is_index <- factor(t2d_all_indices_bmi$is_index, levels = c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0", "1/Ins 120", "1/Glu 120", "ISI 120", "1/(Ins/Glu)120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "1/IFC", "BIGTT SI", "Matsuda")) -->
-
-<!-- # Reorder Index group -->
-<!-- t2d_all_indices_bmi$index_group <- factor(t2d_all_indices_bmi$index_group, levels = c("Fasting", "OGTT_0,120", "OGTT_0,30,120")) -->
-<!-- ``` -->
-
-
-<!-- ```{r} -->
-<!-- #| echo: false -->
-<!-- #| include: false -->
-<!-- #| warning: false -->
-<!-- #| message: false -->
-<!-- # Create matrices for the heatmap -->
-
-<!-- # Create a matrix 'snp_index_effect' by selecting 'nearest_gene', 'is_index', and 'alt_effsize' columns -->
-<!-- t2d_snp_index_effect_bmi <- t2d_all_indices_bmi %>% -->
-<!--   dplyr::select(gene_snp_ra, is_index, alt_effsize) %>%  -->
-<!--     dplyr::mutate(alt_effsize = round(alt_effsize, 2)) %>%  -->
-<!--   tidyr::spread(is_index, alt_effsize) %>%  -->
-<!--   dplyr::filter_all(all_vars(!is.na(.))) -->
-
-
-<!-- # Set row names of 'snp_index_effect' to the values in the 'nearest_gene' column -->
-<!-- t2d_snp_index_effect_bmi <- t2d_snp_index_effect_bmi %>%  -->
-<!--   as_tibble() %>%  -->
-<!--   tibble::column_to_rownames(var = "gene_snp_ra") %>%  -->
-<!--   as.matrix() -->
-
-<!-- # Create another matrix 'snp_index_p' for p-values -->
-
-<!-- t2d_snp_index_p_bmi <- t2d_all_indices_bmi %>% -->
-<!--   dplyr::select(gene_snp_ra, is_index, pvalue) %>% -->
-<!--   # Format the 'pvalue' column in scientific notation -->
-<!--   #mutate(pvalue = sprintf("%.1e", pvalue)) %>% -->
-<!--   dplyr::mutate(pvalue = formatC(pvalue, format = "e", digits = 1, flag = "-")) %>% -->
-<!--     # Spread the data -->
-<!--   tidyr::spread(is_index, pvalue) %>%  -->
-<!--   # Filter out rows with all NA values -->
-<!--   filter_all(all_vars(!is.na(.))) -->
-
-<!-- # Set row names of 'snp_trait_p' to the values in the 'gene_snp_ra' column -->
-<!-- t2d_snp_index_p_bmi <- t2d_snp_index_p_bmi %>%  -->
-<!--   as_tibble() %>%  -->
-<!--   column_to_rownames(var = "gene_snp_ra") %>%  -->
-<!--   as.matrix() -->
-
-
-
-<!-- ``` -->
-
-
-
-<!-- ```{r} -->
-<!-- #| echo: false -->
-<!-- #| include: false -->
-<!-- #| warning: false -->
-<!-- #| message: false -->
-
-<!-- # Paste the elements together -->
-<!-- combined_matrix <- mapply(FUN = function(x, y) paste0(x, " / ", y),  -->
-<!--                           t2d_snp_index_effect_bmi, t2d_snp_index_p_bmi,  -->
-<!--                           SIMPLIFY = FALSE) -->
-
-<!-- # Convert the list to a matrix -->
-<!-- combined_matrix <- matrix(unlist(combined_matrix),  -->
-<!--                           nrow = nrow(t2d_snp_index_effect_bmi),  -->
-<!--                           byrow = FALSE) -->
-
-<!-- # Assign row and column names -->
-<!-- rownames(combined_matrix) <- rownames(t2d_snp_index_effect_bmi) -->
-<!-- colnames(combined_matrix) <- colnames(t2d_snp_index_effect_bmi) -->
-
-<!-- ``` -->
-
-
-
-<!-- ```{r} -->
-<!-- #| echo: false -->
-<!-- #| include: false -->
-<!-- #| warning: false -->
-<!-- #| message: false -->
-<!-- top_anno_col <- data.frame( -->
-<!--   is_index = c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0", "1/Ins 120", "1/Glu 120", "ISI 120", "1/(Ins/Glu)120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "1/IFC", "BIGTT SI", "Matsuda"), -->
-<!--   index_group = c("Fasting", "Fasting", "Fasting", "Fasting", "Fasting", "Fasting", "Fasting", "Fasting", "Fasting", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,120", "OGTT0,30,120", "OGTT0,30,120") -->
-<!-- ) -->
-
-
-<!-- # Heatmap annotation -->
-<!-- group_colors <- c("Fasting" = "#942CCC", "OGTT0,120" = "#417881", "OGTT0,30,120" = "#35F8F2") -->
-
-
-<!-- # Create the top annotation object with specified colors and increased width -->
-<!-- ha_col_sel <- HeatmapAnnotation( -->
-<!--   Groups = top_anno_col$index_group,  -->
-<!--   annotation_name_side = "left", -->
-<!--   show_annotation_name = TRUE,  -->
-<!--   show_legend = TRUE, -->
-<!--   annotation_legend_param = list( -->
-<!--     title = "Groups", -->
-<!--     title_gp = gpar(fontsize = 20, fontface = "bold"), -->
-<!--     labels_gp = gpar(fontsize = 20, fontface = "bold"), -->
-<!--     legend_width = unit(5, "cm"), -->
-<!--     legend_height = unit(10, "cm")), -->
-<!--   col = list(Groups = group_colors),  # Specify colors for each group -->
-<!--   height = unit(20, "cm")  # Adjust the width here -->
-<!-- ) -->
-
-
-<!-- color_space_04 <- colorRamp2(c(-0.04, 0, 0.04), c("blue", "white", "red")) -->
-<!-- color_space_02 <- colorRamp2(c(-0.02, 0, 0.02), c("blue", "white", "red")) -->
-
-<!-- ``` -->
-
-
-
-<!-- ```{r} -->
-<!-- #| echo: false -->
-<!-- #| warning: false -->
-<!-- #| message: false -->
-<!-- #| include: false -->
-
-
-<!-- # Heatmap generation -->
-<!-- set.seed(123) -->
-<!-- p_t2d_all_indices_bmi <- Heatmap( -->
-<!--   t2d_snp_index_effect_bmi, -->
-<!--   row_names_gp = gpar(fontsize = 20), -->
-<!--   column_names_gp = gpar(fontsize = 22), -->
-<!--   name = "beta", -->
-<!--   col = color_space_02, -->
-<!--   na_col = "black", -->
-<!--   top_annotation = ha_col_sel, -->
-<!--   cluster_rows = TRUE, -->
-<!--   cluster_columns = TRUE, -->
-<!--   show_row_dend = TRUE, -->
-<!--   show_column_dend = TRUE, -->
-<!--   row_dend_width = unit(50, "mm"), -->
-<!--   column_dend_height = unit(50, "mm"), -->
-<!--   column_title = NULL, -->
-<!--   show_heatmap_legend = TRUE, -->
-<!--   heatmap_legend_param = list(title = "beta", at = c(-0.02, 0, 0.02), labels = c("-0.02", "0", "0.02"), direction = "vertical", legend_width = unit(5, "cm"), legend_height = unit(100, "cm")), -->
-<!--   #column_split = top_anno_col$index_group, -->
-<!--   #row_split = split, -->
-<!--   #left_annotation = rowAnnotation("Loci associated with T2D" = rownames(t2d_snp_index_effect_bmi), show_legend = FALSE), -->
-<!--   layer_fun = function(j, i, x, y, w, h, fill) { -->
-<!--     grid.text(sprintf(pindex(combined_matrix, i, j)), -->
-<!--               x = x, y = y, -->
-<!--               hjust = 0.5,    # Horizontal justification (0.5 for center) -->
-<!--               vjust = 0.8,    # Vertical justification (0.5 for center) -->
-<!--               gp = gpar(fontsize = 16)) -->
-
-<!--   } -->
-<!-- ) -->
-
-<!-- ``` -->
-
-
-<!-- ```{r} -->
-<!-- #| echo: false -->
-<!-- #| warning: false -->
-<!-- #| message: false -->
-<!-- #| column: screen -->
-<!-- #| fig-width: 40 -->
-<!-- #| fig-height: 250 -->
-<!-- #| fig-cap: "Insulin sensitivity indices association with T2D risk alleles" -->
-<!-- #| label: fig-association-t2d -->
-
-<!-- draw(p_t2d_all_indices_bmi, merge_legend = TRUE) -->
-
-
-
-<!-- ``` -->
-
-
-
-
-

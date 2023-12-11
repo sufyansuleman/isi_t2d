@@ -3,10 +3,6 @@ project:
 
 title: "Suleman et al 2024, Genetics underpinnings of fasting and oral glucose-stimulated based insulin sensitivity indices"
 
-source:
-  - index.qmd
-  - index_2.qmd
-
 format:
   html:
     layout:
