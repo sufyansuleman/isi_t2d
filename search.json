@@ -11,13 +11,6 @@
     "href": "index.html",
     "title": "Suleman et al 2024, Genetics underpinnings of fasting and oral glucose-stimulated based insulin sensitivity indices",
     "section": "",
-    "text": "# #| echo: false\n# #| include: false\n# #| warning: false\n# #| message: false\n#\n# # do clustring\n# set.seed(123)\n# m_clusters &lt;- Mclust(t2d_effect_matx)\n#\n# # get the cluster classification\n# clusters &lt;- m_clusters$classification\n# # convert to datafrmae\n# data_frame &lt;- as.data.frame(t2d_effect_matx)\n# # add cluster column\n# data_frame$cluster &lt;- clusters\n# # order the rows and then remove the cluster column convert back to matrix\n# t2d_effect_mat_ordered &lt;- data_frame[order(data_frame$cluster), -ncol(data_frame)] %&gt;%\n#   as.matrix()\n\n\n# #| echo: false\n# #| include: false\n# #| warning: false\n# #| message: false\n#\n# combined_data &lt;- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ]"
-  },
-  {
-    "objectID": "index_2.html",
-    "href": "index_2.html",
-    "title": "Suleman et al 2024, Genetics underpinnings of fasting and oral glucose-stimulated based insulin sensitivity indices",
-    "section": "",
-    "text": "# #| echo: false\n# #| include: false\n# #| warning: false\n# #| message: false\n#\n# # do clustring\n# set.seed(123)\n# m_clusters &lt;- Mclust(t2d_effect_matx)\n#\n# # get the cluster classification\n# clusters &lt;- m_clusters$classification\n# # convert to datafrmae\n# data_frame &lt;- as.data.frame(t2d_effect_matx)\n# # add cluster column\n# data_frame$cluster &lt;- clusters\n# # order the rows and then remove the cluster column convert back to matrix\n# t2d_effect_mat_ordered &lt;- data_frame[order(data_frame$cluster), -ncol(data_frame)] %&gt;%\n#   as.matrix()\n\n\n# #| echo: false\n# #| include: false\n# #| warning: false\n# #| message: false\n#\n# combined_data &lt;- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ]"
+    "text": "Insulin sensitiivty indices assocaition with T2D risk alleles"
   }
 ]
