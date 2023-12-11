@@ -281,7 +281,8 @@ combined_data <- effsize_long %>%
 #| warning: false
 #| message: false
 
-combined_data <- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ]
+combined_data <- combined_data[order(combined_data$alt_effsize, decreasing = TRUE), ] %>% 
+    dplyr::rename(beta = alt_effsize)
 
 ```
 
@@ -291,16 +292,30 @@ combined_data <- combined_data[order(combined_data$alt_effsize, decreasing = TRU
 #| include: false
 #| warning: false
 #| message: false
-plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra, type = "heatmap", z = ~alt_effsize,
-                          colorscale = list(c(0, "blue"), c(0.5, "white"), c(1, "red")),
-                          zmin = -0.02, zmax = 0.02, text = ~paste(gene_snp_ra,
-                                                                   "\nEffect-size:", alt_effsize,
-                                                                   "\nP-value:", pvalue,
-                                                                   "\nIndex:", is_index, 
-                                                                   "\nIndex Group:", index_group),
-                          hoverinfo = "text") %>%
+plotly_heatmap <-
+    plot_ly(
+        data = combined_data,
+        x = ~ is_index,
+        y = ~ gene_snp_ra,
+        type = "heatmap",
+        z = ~ beta,
+        colorscale = list(c(0, "blue"), c(0.5, "white"), c(1, "red")),
+        zmin = -0.02,
+        zmax = 0.02,
+        text = ~ paste(
+            gene_snp_ra,
+            "\nEffect-size:",
+            beta,
+            "\nP-value:",
+            pvalue,
+            "\nIndex:",
+            is_index,
+            "\nIndex Group:",
+            index_group
+        ),
+        hoverinfo = "text"
+    ) %>%
   layout(xaxis = list(title = "Indices", tickangle = 90),
-         yaxis = list(title = "Gene SNP RA"),
          colorbar = list(title = "Beta"))
 
 
@@ -315,7 +330,7 @@ plotly_heatmap <- plot_ly(data = combined_data, x = ~is_index, y = ~gene_snp_ra,
 #| warning: false
 #| message: false
 #| column: screen
-#| fig.height: 300
+#| fig.height: 270
 #| fig-cap: "Impact of T2D-Associated Risk Alleles on Insulin Sensitivity (IS) Indices. This figure illustrates the relationships between 21 IS indices and 426 genetic variants linked to Type 2 Diabetes (T2D), each with a Minor Allele Frequency (MAF) exceeding 1%. These associations are analyzed using inverse normalized IS indices, which range from -1.0 to 1.0. The analysis specifically focuses on alleles that increase the risk of T2D. The x-axis categorizes the various IS indices, while the y-axis quantifies the effect sizes associated with each specific gene (or locus), variant, and T2D-risk increasing allele. In cases where the gene is denoted by '--', the variant is non-coding. The color spectrum of the heatmap represents the magnitude and direction of the effect size: blue indicates a negative impact, while red signifies a positive impact. Hovering over specific data points reveals detailed information, including the gene name, variant, effect size, p-value, index, and index group. Index groups are classified based on the type of index: fasting, OGTT0,120, or OGTT0,30,120.."
 
 plotly_heatmap
