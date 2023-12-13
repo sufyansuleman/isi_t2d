@@ -2,7 +2,6 @@ project:
   type: website
 
 title: "Suleman et al 2024, Genetics underpinnings of fasting and oral glucose-stimulated based insulin sensitivity indices"
-subtitle: "Association between 21 insulin sensitiivty indoces and 426 T2D associated genetic variants in a population cohort of 5343 individuals of European ancestry without diabetes"
 format:
   html:
     layout:
