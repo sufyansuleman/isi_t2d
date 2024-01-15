@@ -6,3 +6,4 @@
 /.quarto/
 _site/
 renv/library
+env_data.RData
