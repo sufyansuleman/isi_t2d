@@ -178,25 +178,25 @@ t2d_all_indices_bmi <- t2d_all_indices_combined %>%
   dplyr::rename(index_group = type) %>% 
   dplyr::mutate(
     is_index = case_when(
-      is_index == "insu0" ~ "1/FIns",
-      is_index == "homa_ir" ~ "1/HOMA-IR",
+      is_index == "insu0" ~ "inv-FIns",
+      is_index == "homa_ir" ~ "inv-HOMA-IR",
       is_index == "raynaud" ~ "Raynaud SI",
       is_index == "quicki" ~ "QUICKI",
       is_index == "belfiore_0" ~ "Belfiore basal",
-      is_index == "ig_ratio_0" ~ "1/FIns/FGlu",
+      is_index == "ig_ratio_0" ~ "inv-FIns/FGlu",
       is_index == "isi_0" ~ "ISI basal",
       is_index == "bennett" ~ "Bennett SI",
       is_index == "avignon_si0" ~ "Avignon SI0",
-      is_index == "insu120" ~ "1/Ins 120",
-      is_index == "pglu120" ~ "1/Glu 120",
+      is_index == "insu120" ~ "inv-Ins 120",
+      is_index == "pglu120" ~ "inv-Glu 120",
       is_index == "isi_120" ~ "ISI 120",
-      is_index == "ig_ratio_120" ~ "1/(Ins/Glu)120",
+      is_index == "ig_ratio_120" ~ "inv-Ins/Glu120",
       is_index == "gutt" ~ "Gutt Index",
       is_index == "avignon_si120" ~ "Avignon SI120",
       is_index == "avignon_sim" ~ "Avignon SIM",
       is_index == "mod_stumvoll" ~ "Stumvoll Modi",
       is_index == "stumvoll_dem" ~ "Stumvoll Dem",
-      is_index == "ifc" ~ "1/IFC",
+      is_index == "ifc" ~ "inv-IFC",
       is_index == "bigtt_si" ~ "BIGTT SI",
       is_index == "matsuda" ~ "Matsuda",
       TRUE ~ is_index  # Return the same value for unmatched cases
@@ -294,8 +294,8 @@ combined_data <- effsize_long %>%
   left_join(p_long, by = c("gene_snp_ra", "is_index")) %>% 
     mutate(
     index_group = case_when(
-      is_index %in% c("1/FIns", "1/HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "1/FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0") ~ "Fasting",
-      is_index %in% c("1/Ins 120", "1/Glu 120", "ISI 120", "1/(Ins/Glu)120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "1/IFC") ~ "OGTT,0-120",
+      is_index %in% c("inv-FIns", "inv-HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal", "inv-FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0") ~ "Fasting",
+      is_index %in% c("inv-Ins 120", "inv-Glu 120", "ISI 120", "inv-Ins/Glu120", "Gutt Index", "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "inv-IFC") ~ "OGTT,0-120",
       is_index %in% c("BIGTT SI", "Matsuda") ~ "OGTT,0-30-120",
       TRUE ~ "Other"  # For any unmatched case
     )
@@ -366,3 +366,4 @@ plotly_heatmap
 
 
 ```
+
