@@ -30,7 +30,7 @@ source("R/functions.R")
 
 ## 1. Supplementary Tables and Figures
 
-[Supplementary Tables 1-7](Supplementary_files/Supplementary_Tables_1-6.xlsx)
+[Supplementary Tables 1-6](Supplementary_files/Supplementary_Tables_1-6.xlsx)
 
 [Supplementary Figures 1-5](Supplementary_files/Supplementary_Figures_1-5.pdf)
 
